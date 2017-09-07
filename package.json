@@ -4,7 +4,7 @@
   "description": "sql-like join of object streams based on keys. Streams must be sorted.",
   "main": "joinStreams.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node .\\node_modules\\mocha\\bin\\mocha"
   },
   "repository": {
     "type": "git",
