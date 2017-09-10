@@ -1,27 +1,30 @@
 {
   "name": "join_streams",
   "version": "0.1.0",
-  "description": "sql-like join of object streams based on keys. Streams must be sorted.",
+  "description": "sql-like join of object streams based on keys. Each stream must be sorted.",
   "main": "joinStreams.js",
   "scripts": {
     "test": "node .\\node_modules\\mocha\\bin\\mocha"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kishkash555/stream-join-onetomany.git"
+    "url": "https://github.com/kishkash555/stream-join-manytomany.git"
   },
   "keywords": [
     "node",
     "stream",
     "join",
-    "sql"
+    "ETL",
+    "one-to-many",
+    "many-to-one",
+    "many-to-many"
   ],
   "author": "KishKash",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kishkash555/stream-join-onetomany/issues"
   },
-  "homepage": "https://github.com/kishkash555/stream-join-onetomany",
+  "homepage": "https://github.com/kishkash555/stream-join-manytomany",
   "devDependencies": {
     "mocha": "^3.4.2"
   }

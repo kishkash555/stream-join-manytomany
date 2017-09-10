@@ -91,22 +91,22 @@ describe('joinStreams', function () {
 				result.push(data)
 			}).on('end', function () {
 				assert.deepEqual(result, [
-					{ key: 0, a: "A0", b: "B0" },
-					{ key: 0, a: "A0", b: "B1" },
-					{ key: 0, a: "A0", b: "B2" },
-					{ key: 1, a: "A1", b: "B3" },
-					{ key: 1, a: "A2", b: "B3" },
-					{ key: 1, a: "A3", b: "B3" },
-					{ key: 2, a: "A4", b: "B4" },
-					{ key: 4, a: "A6", b: "B5" },
-					{ key: 4, a: "A6", b: "B6" },
-					{ key: 4, a: "A6", b: "B7" },
-					{ key: 4, a: "A7", b: "B5" },
-					{ key: 4, a: "A7", b: "B6" },
-					{ key: 4, a: "A7", b: "B7" },
-					{ key: 4, a: "A8", b: "B5" },
-					{ key: 4, a: "A8", b: "B6" },
-					{ key: 4, a: "A8", b: "B7" },
+					{ key: "0", a: "A0", b: "B0" },
+					{ key: "0", a: "A0", b: "B1" },
+					{ key: "0", a: "A0", b: "B2" },
+					{ key: "1", a: "A1", b: "B3" },
+					{ key: "1", a: "A2", b: "B3" },
+					{ key: "1", a: "A3", b: "B3" },
+					{ key: "2", a: "A4", b: "B4" },
+					{ key: "4", a: "A6", b: "B5" },
+					{ key: "4", a: "A6", b: "B6" },
+					{ key: "4", a: "A6", b: "B7" },
+					{ key: "4", a: "A7", b: "B5" },
+					{ key: "4", a: "A7", b: "B6" },
+					{ key: "4", a: "A7", b: "B7" },
+					{ key: "4", a: "A8", b: "B5" },
+					{ key: "4", a: "A8", b: "B6" },
+					{ key: "4", a: "A8", b: "B7" },
 				])
 				done()
 			})
@@ -122,22 +122,22 @@ describe('joinStreams', function () {
 				result.push(data)
 			}).on('end', function () {
 				assert.deepEqual(result, [
-					{ key: 0, a: "A0", b: "B0" },
-					{ key: 0, a: "A0", b: "B1" },
-					{ key: 0, a: "A0", b: "B2" },
-					{ key: 1, a: "A1", b: "B3" },
-					{ key: 1, a: "A2", b: "B3" },
-					{ key: 1, a: "A3", b: "B3" },
-					{ key: 2, a: "A4", b: "B4" },
-					{ key: 4, a: "A6", b: "B5" },
-					{ key: 4, a: "A6", b: "B6" },
-					{ key: 4, a: "A6", b: "B7" },
-					{ key: 4, a: "A7", b: "B5" },
-					{ key: 4, a: "A7", b: "B6" },
-					{ key: 4, a: "A7", b: "B7" },
-					{ key: 4, a: "A8", b: "B5" },
-					{ key: 4, a: "A8", b: "B6" },
-					{ key: 4, a: "A8", b: "B7" },
+					{ key: "0", a: "A0", b: "B0" },
+					{ key: "0", a: "A0", b: "B1" },
+					{ key: "0", a: "A0", b: "B2" },
+					{ key: "1", a: "A1", b: "B3" },
+					{ key: "1", a: "A2", b: "B3" },
+					{ key: "1", a: "A3", b: "B3" },
+					{ key: "2", a: "A4", b: "B4" },
+					{ key: "4", a: "A6", b: "B5" },
+					{ key: "4", a: "A6", b: "B6" },
+					{ key: "4", a: "A6", b: "B7" },
+					{ key: "4", a: "A7", b: "B5" },
+					{ key: "4", a: "A7", b: "B6" },
+					{ key: "4", a: "A7", b: "B7" },
+					{ key: "4", a: "A8", b: "B5" },
+					{ key: "4", a: "A8", b: "B6" },
+					{ key: "4", a: "A8", b: "B7" },
 				])
 				done()
 			})
@@ -160,21 +160,21 @@ function createTestStream2() {
 
 function createTestStream3() {
 	return testTools.createRepeatingKeyStream({
-		0: 1,
-		1: 3, // 1-3
-		2: 1, // 4
-		3: 1,  // 5
-		4: 3  // 6-8 
+		"0": 1,
+		"1": 3, // 1-3
+		"2": 1, // 4
+		"3": 1,  // 5
+		"4": 3  // 6-8 
 	}, "A", "a")
 }
 
 function createTestStream4() {
 	return testTools.createRepeatingKeyStream({
-		0: 3, // 0 -2
-		1: 1, // 3
-		2: 1,  // 4
+		"0": 3, // 0 -2
+		"1": 1, // 3
+		"2": 1,  // 4
 
-		4: 3  // 5-7
+		"4": 3  // 5-7
 	}, "B", "b")
 }
 

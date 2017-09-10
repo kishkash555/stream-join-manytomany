@@ -51,8 +51,7 @@ module.exports = {
     slowWriter: function () {
         var ret = new Writable({ objectMode: true, highWaterMark: 2 })
         ret._write = function (data, _, callback) {
-            //console.log(time.since(start).millis() + ': ' + JSON.stringify(data))
-            setTimeout(callback, 150)
+            setTimeout(callback, 75)
         }
         return ret
     },

@@ -26,7 +26,8 @@ function joinStreams(streamA, streamB, options) {
         ai = 0,
         bi = 0,
         matchPoolOpen = false,
-        pausedWritingMatchPool = false;
+        paused = false,
+        writingMatchPool = false;
 
     var Ai = 0, Bi = 0;
 
@@ -54,62 +55,46 @@ function joinStreams(streamA, streamB, options) {
         streamA.pause();
 
         emptyA = emptyA || nullAllFields(objA);
-        if (objB)
-            handleNewAandB();
-        if (isDoneB)
-            handleNewAorB()
+        processIfReady();
     });
 
     streamB.on('data', function (data) {
         if (objB) {
-            throw new Error('Stream A fired unexpectedly');
+            throw new Error('Stream B fired unexpectedly');
         }
         objB = data;
         streamB.pause();
 
         emptyB = emptyB || nullAllFields(objB);
-        if (objA)
-            handleNewAandB();
-        if (isDoneA)
-            handleNewAorB();
+        processIfReady();
     });
 
     streamA.on('end', function () {
         isDoneA = true;
-        if (objB || isDoneB)
-            handleNewAorB();
+        processIfReady();
     })
 
     streamB.on('end', function () {
         isDoneB = true;
-        if (objA || isDoneA)
-            handleNewAorB();
+        processIfReady();
     })
 
-    streamA.pause();
-    streamB.pause();
 
     joinReadable._read = function () {
         sinkReady = true;
-        writeOutputOrResumeInputs();
+        processIfReady();
     }
 
-    function writeOutputOrResumeInputs() {
-        if (pausedWritingMatchPool) // 
+    function processIfReady() {
+        if (writingMatchPool || paused && !sinkReady)
+            return;
+        if (paused && sinkReady)
             writeMatchPool()
         else {
-            if (objA && isDoneB || isDoneA && objB)
-                handleNewAorB();
-            else if (objA && objB)
-                handleNewAandB();
-            else {
-                if (!(isDoneA || objA)) {
-                    streamA.resume();
-                }
-                if (!(isDoneB || objB)) {
-                    streamB.resume();
-                }
-            }
+            if (objA && objB)
+                handleNewAandB()
+            else if ((objA || isDoneA) && (objB || isDoneB))
+                handleNewAorB()
         }
     }
 
@@ -117,36 +102,33 @@ function joinStreams(streamA, streamB, options) {
 
     function handleNewAandB() {
         if (matchPoolOpen) {
-            // console.log('matchPoolOpen')
             matchPoolOpen = false;
             if (!isDoneB && comp(aMatchPool[0], objB) == 0) {
-                // console.log('objB ' + JSON.stringify(objB) + ' matched')
                 bMatchPool.push(objB);
                 objB = undefined;
                 matchPoolOpen = true;
                 streamB.resume();
             }
             if (!isDoneA && comp(objA, bMatchPool[0]) == 0) {
-                // console.log('objA ' + JSON.stringify(objB) + ' matched')
                 aMatchPool.push(objA);
                 objA = undefined;
                 matchPoolOpen = true;
                 streamA.resume();
             }
+            if (!matchPoolOpen) {
+                writeMatchPool();
+            }
         }
-        if (!matchPoolOpen) {
-            writeMatchPool()
-            if (pausedWritingMatchPool) // sink is still buffering. wait for a read event;
-                return;
-            // console.log('compare ' + JSON.stringify(objA) + ' and ' + JSON.stringify(objB))
+        else {
             switch (comp(objA, objB)) {
                 case -1: // A < B
                     if (keepAs) {
                         aMatchPool.push(objA)
                         bMatchPool.push(emptyB)
-                        pausedWritingMatchPool = true;
+                        paused = true;
                     }
                     objA = undefined;
+                    streamA.resume();
                     break;
                 case 0: // A matches B
                     aMatchPool.push(objA)
@@ -154,49 +136,23 @@ function joinStreams(streamA, streamB, options) {
                     objA = undefined;
                     objB = undefined;
                     matchPoolOpen = true;
+                    streamA.resume();
+                    streamB.resume();
                     break;
                 case 1: // A > B
                     if (keepBs) {
                         aMatchPool.push(emptyA)
                         bMatchPool.push(objB)
-                        pausedWritingMatchPool = true;
+                        paused = true;
                     }
                     objB = undefined;
+                    streamB.resume();
                     break;
             }
-            writeOutputOrResumeInputs();
         }
     }
-
-    function writeMatchPool() {
-        // console.log('wirteMatchPool')
-        pausedWritingMatchPool = false; // prevent this function from being called twice
-        var al = aMatchPool.length,
-            bl = bMatchPool.length;
-        if (!(al && bl)) return
-
-        for (; ai < al && sinkReady; ai++) {
-            for (; bi < bl && sinkReady; bi++) {
-                sinkReady = joinReadable.push(fuse(aMatchPool[ai], bMatchPool[bi]))
-                // console.log('push')
-            }
-            if (bi == bl) bi = 0;
-        }
-        if (sinkReady) {
-            ai = 0;
-            aMatchPool = [];
-            bMatchPool = [];
-            writeOutputOrResumeInputs();
-        }
-        else {
-            pausedWritingMatchPool = true;
-            console.log('pausedWritingMatchPool')
-        }
-    }
-
 
     function handleNewAorB() {
-
         var toPush;
         if (isDoneB && !isDoneA && keepAs && objA) { // B stream depleted
             toPush = fuse(objA, emptyB);
@@ -206,12 +162,39 @@ function joinStreams(streamA, streamB, options) {
         }
         else if (isDoneA && isDoneB) {
             writeMatchPool()
-            // console.log('joinStreams done')
-            if (!pausedWritingMatchPool)
+            if (!paused)
                 toPush = null;
         }
         if (!(typeof toPush == 'undefined'))
             sinkReady = joinReadable.push(toPush);
+    }
+
+    function writeMatchPool() {
+        paused = false; // prevent this function from being called twice
+        writingMatchPool = true;
+        var al = aMatchPool.length,
+            bl = bMatchPool.length;
+        if (!(al && bl)) return
+
+        while (ai < al && sinkReady) {
+            for (; bi < bl && sinkReady; bi++) {
+                sinkReady = joinReadable.push(fuse(aMatchPool[ai], bMatchPool[bi]))
+            }
+            if (bi == bl) {
+                bi = 0;
+                ai++;
+            }
+        }
+        writingMatchPool = false;
+        if (sinkReady) {
+            ai = 0;
+            aMatchPool = [];
+            bMatchPool = [];
+            processIfReady()
+        }
+        else {
+            paused = true;
+        }
     }
 }
 
