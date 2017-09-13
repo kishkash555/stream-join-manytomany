@@ -1,6 +1,6 @@
 {
   "name": "join_streams",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "sql-like join of object streams based on keys. Each stream must be sorted.",
   "main": "joinStreams.js",
   "scripts": {
