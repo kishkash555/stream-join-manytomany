@@ -2,7 +2,7 @@ Join Streams
 ============
 
 Joins the fields from two object streams, to create a single object stream in the output.
-Unlike other stream-joining modules available on NPM, this module combines only those objects that have certain fields (designated as keys) that match. In other words, this is an implementation of an SQL JOIN for [Node JS streams](https://nodejs.org/api/stream.html), including support for INNER, LEFT and OUTER joins.
+Unlike other stream-joining modules available on NPM, this module combines objects from the first stream with objects from the second stream that have certain fields (designated as keys) whose values match. In other words, this is an implementation of an SQL JOIN for [Node JS streams](https://nodejs.org/api/stream.html), including support for INNER, LEFT and OUTER joins.
 
  
 # Installation
@@ -61,8 +61,10 @@ For inner join, only the countries that appear in both streams (i.e. comparison 
 
 ## Notes 
 
-1. with 'left' or 'outer' join, non-matched objects are passed to the output stream. These objects will still contain all the fields of both A and B; the missing fields will have the value `undefined`. To change this behavior, provide an implementation for the fuse function.
+1. with 'left' or 'outer' join, non-matched objects are passed to the output stream. These objects will still contain all the fields of both A and B; the missing fields will have the value `null`. To change this behavior, provide an implementation for the fuse function.
 1. the default join type is 'inner'.
-1. `join_streams` assumes each input stream was sorted by the same comparison function that is used to join. An unsorted stream will not raise any exception, but the result may be incomplete. The streams can be sorted in either ascending or descending order, as long as they both use the same order
-2. `join_streams` supports multiple occurences of a key in the stream.
+1. `join_streams` assumes each input stream was sorted by the same comparison function that is used to join. An unsorted stream will not raise any exception, but the result may be incomplete.
+1. `join_streams` fully supports repeating keys and outputs all the corresponding matches.
+2. `join_streams` is very lean on memory. Its memory consumption does not rise with the number of processed elements. Therefore it is suitable for prototyping big-data pipelines.
+
 
